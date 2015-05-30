@@ -1,4 +1,5 @@
 #! /bin/bash
+# $1: Directorio de salida relativo al directorio actual
 
 ls data > temp001
 
@@ -10,5 +11,5 @@ curl -s $url/filesizes > all_links.txt
     | head -1 | cut -d" " -f2 \
     | while read f;
 	do
-	    curl -s $url/$f > data/$f
+	    curl -s $url/$f > $1/$f
 	done
