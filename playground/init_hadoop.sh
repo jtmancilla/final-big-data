@@ -11,7 +11,15 @@ docker run -ti --name hadoop-pseudo-proyecto \
 	   -p 8000:8000 -p 9999:9999 \
 	   nanounanue/docker-hadoop
 
+# Para tener el comando man
 sudo apt-get install man-db
+
+# Necesario para usar Flume
+sudo ln -s /usr/lib/kite/kite-morphlines-* /usr/lib/flume-ng/lib
+sudo ln -s /usr/lib/kite/lib/metrics* /usr/lib/flume-ng/lib
+sudo ln -s /usr/lib/kite/lib/config-1.0.2.jar /usr/lib/flume-ng/lib
+sudo ln -s /usr/lib/kite/lib/Saxon-HE-9.5.1-5.jar /usr/lib/flume-ng/lib
+sudo ln -s /usr/lib/kite/lib/tika-* /usr/lib/flume-ng/lib
 
 # Correr el contenedor si ya se había creado
 docker start -ia hadoop-pseudo-proyecto
@@ -27,7 +35,8 @@ curl http://gdeltproject.org/data/lookups/CSV.header.dailyupdates.txt > data/gde
 unzip -p data/raw/20130412.export.CSV.zip | cat data/gdelt_headers.tsv - > data/schema/20130412.export.CSV
 kite-dataset csv-schema data/schema/20130412.export.CSV --class GDELT --delimiter "\t" -o data/schema/gdelt_raw20130412.avsc
 # IMPORTANTE: Hay que cambiar el tipo de Actor1Geo_FeatureID y Actor2Geo_FeatureID a string manualmente y renombrarlo a gdelt.avsc.
-# BUG: POR QUE AL LEER EL CSV DE 20130409 LEE PUROS NULLS??
+# ISSUE: POR QUE AL LEER EL CSV DE 20130409 LEE PUROS NULLS??
+# [SOLVED] Tiene que tener los headers para que lo lea!
 
 # Crear el dataset en el hive metastore (desde playground)
 kite-dataset create dataset:hive:gdelt --schema data/schema/gdelt.avsc 
@@ -36,19 +45,31 @@ hadoop fs -ls -R /user/hive
 
 #---------------------------------------------------------------------------------------------------------------
 # Probamos importar unos datos
-unzip -p data/raw/20130412.export.CSV.zip | cat data/gdelt_headers.tsv - > data/spool/20130412.export.CSV
-kite-dataset csv-import data/spool/20130412.export.CSV dataset:hive:gdelt --delimiter "\t"
-hadoop fs -ls -R /user/hive
+#unzip -p data/raw/20130412.export.CSV.zip | cat data/gdelt_headers.tsv - > data/spool/20130412.export.CSV
+#kite-dataset csv-import data/spool/20130412.export.CSV dataset:hive:gdelt --delimiter "\t"
+#hadoop fs -ls -R /user/hive
 
 # Podemos ver los datos en HIVE
-beeline -u jdbc:hive2://localhost:10000
-show tables;
-select * from gdelt limit 10;
+#beeline -u jdbc:hive2://localhost:10000
+#show tables;
+#select * from gdelt limit 10;
 
 # Borramos el dataset de pruebas (hay que crearlo de nuevo)
-kite-dataset delete dataset:hive:gdelt
+#kite-dataset delete dataset:hive:gdelt
 
 
+#---------------------------------------------------------------------------------------------------------------
+# Correr el agente de flume (desde playground)
+flume-ng agent -n GDELTAgent -Xmx300m --conf flume -f flume/gdelt-agent.conf
+# ISSUE: Hay que cambiar la confuguración de los agentes porque se pierde info. Agarran la primera tanda y borran el archivo original.
+
+# Abrir otra conexión al contenedor (desde otra terminal)
+docker exec -it hadoop-pseudo-proyecto /bin/zsh
+
+#---------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------
 
 
 
