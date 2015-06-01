@@ -12,9 +12,9 @@ curl -s $url/filesizes > all_links.txt
     | head -1 | cut -d" " -f2 \
     | while read f;
 	do
-	    echo "Bajando\t" $f "..."
+	    echo "Bajando  " $f "..."
 	    curl -s $url/$f > $1/$f
-	    echo "Mandando\t" $f " a carpeta spool..."
+	    echo "Mandando " $f " a carpeta spool..."
 	    unzip -p $1/$f > $2/$f
 	done
 
