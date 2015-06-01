@@ -1,7 +1,8 @@
 #! /bin/bash
-# $1: Directorio de salida relativo al directorio actual
+# $1: Directorio de los datos
+# $2: Directorio spool donde esta escuchando Flume
 
-ls data > temp001
+ls $1 > temp001
 
 url=http://data.gdeltproject.org/events
 
@@ -11,5 +12,10 @@ curl -s $url/filesizes > all_links.txt
     | head -1 | cut -d" " -f2 \
     | while read f;
 	do
+	    echo "Bajando\t" $f "..."
 	    curl -s $url/$f > $1/$f
+	    echo "Mandando\t" $f " a carpeta spool..."
+	    unzip -p $1/$f > $2/$f
 	done
+
+rm temp001

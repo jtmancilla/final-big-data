@@ -36,10 +36,11 @@ unzip -p data/raw/20130412.export.CSV.zip | cat data/gdelt_headers.tsv - > data/
 kite-dataset csv-schema data/schema/20130412.export.CSV --class GDELT --delimiter "\t" -o data/schema/gdelt_raw20130412.avsc
 # IMPORTANTE: Hay que cambiar el tipo de Actor1Geo_FeatureID y Actor2Geo_FeatureID a string manualmente y renombrarlo a gdelt.avsc.
 # ISSUE: POR QUE AL LEER EL CSV DE 20130409 LEE PUROS NULLS??
-# [SOLVED] Tiene que tener los headers para que lo lea!
+# [SOLVED] Tiene que tener los headers para que lo lea! Para leer con Flume no hacen falta, así que no los ponemos después.
 
 # Crear el dataset en el hive metastore (desde playground)
 kite-dataset create dataset:hive:gdelt --schema data/schema/gdelt.avsc 
+
 # El dataset queda en: /user/hive/warehouse/gdelt
 hadoop fs -ls -R /user/hive
 
@@ -60,11 +61,14 @@ hadoop fs -ls -R /user/hive
 
 #---------------------------------------------------------------------------------------------------------------
 # Correr el agente de flume (desde playground)
+# NOTA: Preferí usar un sink en Avro directo al HDFS en lugar de la cosa experimental con Kite
 flume-ng agent -n GDELTAgent -Xmx300m --conf flume -f flume/gdelt-agent.conf
-# ISSUE: Hay que cambiar la confuguración de los agentes porque se pierde info. Agarran la primera tanda y borran el archivo original.
 
 # Abrir otra conexión al contenedor (desde otra terminal)
 docker exec -it hadoop-pseudo-proyecto /bin/zsh
+
+# Correr el código que baja los datos y los mete al spoolDir (desde playground)
+./process_background.sh data/raw data/spool 5
 
 #---------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------
