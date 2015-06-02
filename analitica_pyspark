@@ -1,0 +1,24 @@
+### pyspark
+
+
+import csv
+from io import StringIO
+
+def load_tsv(archivo):
+    return csv.reader(StringIO(archivo[1]), delimiter='\t')
+
+
+####  Actor1Code
+
+gdelt = sc.textFile("hdfs://localhost/user/itam/data/20130412.export.CSV").flatMap(load_tsv)
+gdelt.take(3)[5]
+
+#### Contamos el numero diferente de eventos
+#### gdelt = sc.textFile("hdfs://localhost/user/itam/data/20130412.export.CSV")
+
+gdelt.map(lambda line: (line.split('\t')[22]))\
+.distinct()\
+.count()
+
+### contamos registro
+gdelt.count()
