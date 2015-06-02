@@ -9,7 +9,7 @@
 ############### Eventos de mexico entre eventos totales. #####################\
 \
 select MonthYear, c_mx/c prop from (SELECT MonthYear, count(*) c, count(IF(ActionGeo_CountryCode = 'MX',1,NULL)) c_mx \
-FROM [gdelt-bq:full.events] WHERE MonthYear > 0 \
+FROM gdelt WHERE MonthYear > 0 \
 GROUP BY MonthYear\
 ORDER BY MonthYear);\
 \
@@ -18,7 +18,7 @@ ORDER BY MonthYear);\
 \
 SELECT MonthYear, ActionGeo_Long, ActionGeo_Lat, ActionGeo_FullName,\
         count(*) c_mx\
-FROM [gdelt-bq:full.events]\
+FROM gdelt\
 WHERE EventRootCode = '19' AND ActionGeo_CountryCode = 'MX'\
 GROUP BY MonthYear, ActionGeo_Long, ActionGeo_Lat, ActionGeo_FullName\
 ORDER BY MonthYear;\
@@ -33,13 +33,13 @@ SELECT Year, Actor1Name, Actor2Name, Count FROM (\
     FROM \
     (\
         SELECT Actor1Name, Actor2Name,  Year \
-        FROM [gdelt-bq:full.events] \
+        FROM gdelt\
         WHERE Actor1Name < Actor2Name and Actor1CountryCode != '' and \
         Actor2CountryCode != '' and Actor1CountryCode!=Actor2CountryCode \
         and ActionGeo_CountryCode='MX'),\
     (\
         SELECT Actor2Name Actor1Name, Actor1Name Actor2Name, Year \
-        FROM [gdelt-bq:full.events] \
+        FROM gdelt\
         WHERE Actor1Name > Actor2Name  and Actor1CountryCode != ''\
         and Actor2CountryCode != '' and Actor1CountryCode!= Actor2CountryCode\
         and ActionGeo_CountryCode='MX'),\
