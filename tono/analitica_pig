@@ -9,6 +9,9 @@ gdelt = LOAD 'datasets/gdelt' USING org.apache.pig.piggybank.storage.avro.AvroSt
 head = LIMIT gelt 5;
 DUMP head; 
 
+#guardamos
+store head into '/user/itam/data/head' using PigStorage('\t','-schema');
+
 
 ### visualizamos Actores distintos.
 
