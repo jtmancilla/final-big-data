@@ -1,5 +1,17 @@
 ANALITICA.
 
+### prueba 1
+
+SELECT MonthYear, ActionGeo_Long, ActionGeo_Lat, ActionGeo_FullName
+    FROM gdelt
+    LIMIT 1000;
+    
+### prueba 1 guardando csv
+
+hive -e 'set hive.cli.print.header=true; SELECT MonthYear, ActionGeo_Long, ActionGeo_Lat, ActionGeo_FullName FROM gdelt3 limit 1000' | sed 's/[\t]/,/g' > data/mapa.csv
+
+
+
 ############### Eventos de mexico entre eventos totales. #####################
 
 select MonthYear, c_mx/c prop from (SELECT MonthYear, count(*) c, count(IF(ActionGeo_CountryCode = 'MX',1,NULL)) c_mx 
