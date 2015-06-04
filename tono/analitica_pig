@@ -1,18 +1,29 @@
 PIG
 
-### CARGAMOS AVRO
+## creamos hdfs.
+
+kite-dataset create dataset:hdfs:/user/itam/datasets/gdelt --schema data/gdelt.avsc
+
+kite-dataset csv-import data/20130412.export.CSV dataset:hdfs:/user/itam/datasets/gdelt --delimiter "\t"
+
+## entramos grunt
+
+pig -useHCatalog
+
+### CARGAMOS avro
 
 gdelt = LOAD 'datasets/gdelt' USING org.apache.pig.piggybank.storage.avro.AvroStorage();
 
 ### visualizando la tabla de gdelt
 
-head = LIMIT gelt 5;
+head = LIMIT gdelt 5;
 DUMP head; 
 
-#guardamos
+#guardamos TEORICO. NO se ha probado.
 store head into '/user/itam/data/head' using PigStorage('\t','-schema');
 
 
+##########################################################
 ### visualizamos Actores distintos.
 
 Actor1Name = DISTINCT (FOREACH gdelt GENERATE Actor1Name);
